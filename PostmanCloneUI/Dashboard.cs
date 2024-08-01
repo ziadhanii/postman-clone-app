@@ -1,30 +1,42 @@
-namespace PostmanCloneUI
+using PostmanCloneLibrary;
+
+namespace PostmanCloneUI;
+
+public partial class Dashboard : Form
 {
-    public partial class Dashboard : Form
+    private readonly IApiAccess _api = new ApiAccess();
+
+    public Dashboard()
     {
-        public Dashboard()
+        InitializeComponent();
+    }
+
+    private async void CallAPIButton_Click(object sender, EventArgs e)
+    {
+        SystemStatus.Text = "Calling API...";
+        ResponseTextBox.Text = "";
+        // Validate the API URL  
+
+
+        if (_api.IsValidUrl(APITextBox.Text) == false)
         {
-            InitializeComponent();
+            SystemStatus.Text = "Invalid URL";
+            return;
         }
 
-        private async void CallAPIButton_Click(object sender, EventArgs e)
+
+        try
         {
-            // Validate the API URL  
-            try
-            {
-                SystemStatus.Text = "Calling API...";
-                // Sample code - replace with the actual API call 
+            SystemStatus.Text = "Calling API...";
+            // Sample code - replace with the actual API call 
 
-                await Task.Delay(2000);
-
-                SystemStatus.Text = "Ready";
-            }
-            catch (Exception ex)
-            {
-                ResponseTextBox.Text = "Error: " + ex.Message;
-                SystemStatus.Text = "Error";
-            }
+            ResponseTextBox.Text = await _api.CallApiAsync(APITextBox.Text);
+            SystemStatus.Text = "Ready";
         }
-
+        catch (Exception ex)
+        {
+            ResponseTextBox.Text = "Error: " + ex.Message;
+            SystemStatus.Text = "Error";
+        }
     }
 }
