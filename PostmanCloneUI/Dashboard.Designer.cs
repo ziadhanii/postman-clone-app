@@ -33,18 +33,25 @@
             EnterAPILabel = new Label();
             APITextBox = new TextBox();
             CallAPIButton = new Button();
-            ResponseTextBox = new TextBox();
             StatusStrip = new StatusStrip();
             SystemStatus = new ToolStripStatusLabel();
-            ResponseLabel = new Label();
+            HttpVerbSelection = new ComboBox();
+            CallDataTabControl = new TabControl();
+            BodyTab = new TabPage();
+            BodyTextBox = new TextBox();
+            ResponseTab = new TabPage();
+            ResponseTextBox = new TextBox();
             StatusStrip.SuspendLayout();
+            CallDataTabControl.SuspendLayout();
+            BodyTab.SuspendLayout();
+            ResponseTab.SuspendLayout();
             SuspendLayout();
             // 
             // FormHeader
             // 
             FormHeader.AutoSize = true;
             FormHeader.Font = new Font("Segoe UI", 25.8000011F, FontStyle.Regular, GraphicsUnit.Point, 0);
-            FormHeader.Location = new Point(40, 29);
+            FormHeader.Location = new Point(42, 29);
             FormHeader.Name = "FormHeader";
             FormHeader.Size = new Size(317, 60);
             FormHeader.TabIndex = 0;
@@ -53,22 +60,22 @@
             // EnterAPILabel
             // 
             EnterAPILabel.AutoSize = true;
-            EnterAPILabel.Location = new Point(46, 135);
+            EnterAPILabel.Location = new Point(45, 113);
             EnterAPILabel.Name = "EnterAPILabel";
-            EnterAPILabel.Size = new Size(77, 41);
+            EnterAPILabel.Size = new Size(214, 41);
             EnterAPILabel.TabIndex = 1;
-            EnterAPILabel.Text = "API :";
+            EnterAPILabel.Text = "Enter API URL :";
             // 
             // APITextBox
             // 
-            APITextBox.Location = new Point(137, 133);
+            APITextBox.Location = new Point(202, 166);
             APITextBox.Name = "APITextBox";
-            APITextBox.Size = new Size(1192, 47);
+            APITextBox.Size = new Size(1127, 47);
             APITextBox.TabIndex = 2;
             // 
             // CallAPIButton
             // 
-            CallAPIButton.Location = new Point(1355, 132);
+            CallAPIButton.Location = new Point(1355, 165);
             CallAPIButton.Margin = new Padding(0);
             CallAPIButton.Name = "CallAPIButton";
             CallAPIButton.Size = new Size(106, 51);
@@ -76,18 +83,6 @@
             CallAPIButton.Text = "Send";
             CallAPIButton.UseVisualStyleBackColor = true;
             CallAPIButton.Click += CallAPIButton_Click;
-            // 
-            // ResponseTextBox
-            // 
-            ResponseTextBox.BackColor = Color.White;
-            ResponseTextBox.BorderStyle = BorderStyle.FixedSingle;
-            ResponseTextBox.Location = new Point(54, 271);
-            ResponseTextBox.Multiline = true;
-            ResponseTextBox.Name = "ResponseTextBox";
-            ResponseTextBox.ReadOnly = true;
-            ResponseTextBox.ScrollBars = ScrollBars.Both;
-            ResponseTextBox.Size = new Size(1407, 540);
-            ResponseTextBox.TabIndex = 4;
             // 
             // StatusStrip
             // 
@@ -108,14 +103,72 @@
             SystemStatus.Size = new Size(76, 31);
             SystemStatus.Text = "Ready";
             // 
-            // ResponseLabel
+            // HttpVerbSelection
             // 
-            ResponseLabel.AutoSize = true;
-            ResponseLabel.Location = new Point(46, 216);
-            ResponseLabel.Name = "ResponseLabel";
-            ResponseLabel.Size = new Size(161, 41);
-            ResponseLabel.TabIndex = 6;
-            ResponseLabel.Text = "Response :";
+            HttpVerbSelection.DropDownStyle = ComboBoxStyle.DropDownList;
+            HttpVerbSelection.FormattingEnabled = true;
+            HttpVerbSelection.Items.AddRange(new object[] { "GET", "POST" });
+            HttpVerbSelection.Location = new Point(54, 165);
+            HttpVerbSelection.Name = "HttpVerbSelection";
+            HttpVerbSelection.Size = new Size(127, 49);
+            HttpVerbSelection.TabIndex = 7;
+            // 
+            // CallDataTabControl
+            // 
+            CallDataTabControl.Controls.Add(BodyTab);
+            CallDataTabControl.Controls.Add(ResponseTab);
+            CallDataTabControl.Location = new Point(54, 245);
+            CallDataTabControl.Name = "CallDataTabControl";
+            CallDataTabControl.SelectedIndex = 0;
+            CallDataTabControl.Size = new Size(1407, 573);
+            CallDataTabControl.TabIndex = 8;
+            // 
+            // BodyTab
+            // 
+            BodyTab.Controls.Add(BodyTextBox);
+            BodyTab.Location = new Point(4, 50);
+            BodyTab.Name = "BodyTab";
+            BodyTab.Padding = new Padding(3);
+            BodyTab.Size = new Size(1399, 519);
+            BodyTab.TabIndex = 0;
+            BodyTab.Text = "Body";
+            BodyTab.UseVisualStyleBackColor = true;
+            // 
+            // BodyTextBox
+            // 
+            BodyTextBox.BackColor = Color.White;
+            BodyTextBox.BorderStyle = BorderStyle.FixedSingle;
+            BodyTextBox.Dock = DockStyle.Fill;
+            BodyTextBox.Location = new Point(3, 3);
+            BodyTextBox.Multiline = true;
+            BodyTextBox.Name = "BodyTextBox";
+            BodyTextBox.ScrollBars = ScrollBars.Both;
+            BodyTextBox.Size = new Size(1393, 513);
+            BodyTextBox.TabIndex = 5;
+            // 
+            // ResponseTab
+            // 
+            ResponseTab.Controls.Add(ResponseTextBox);
+            ResponseTab.Location = new Point(4, 30);
+            ResponseTab.Name = "ResponseTab";
+            ResponseTab.Padding = new Padding(3);
+            ResponseTab.Size = new Size(1399, 539);
+            ResponseTab.TabIndex = 1;
+            ResponseTab.Text = "Response";
+            ResponseTab.UseVisualStyleBackColor = true;
+            // 
+            // ResponseTextBox
+            // 
+            ResponseTextBox.BackColor = Color.White;
+            ResponseTextBox.BorderStyle = BorderStyle.FixedSingle;
+            ResponseTextBox.Dock = DockStyle.Fill;
+            ResponseTextBox.Location = new Point(3, 3);
+            ResponseTextBox.Multiline = true;
+            ResponseTextBox.Name = "ResponseTextBox";
+            ResponseTextBox.ReadOnly = true;
+            ResponseTextBox.ScrollBars = ScrollBars.Both;
+            ResponseTextBox.Size = new Size(1393, 533);
+            ResponseTextBox.TabIndex = 5;
             // 
             // Dashboard
             // 
@@ -123,9 +176,9 @@
             AutoScaleMode = AutoScaleMode.Font;
             BackColor = Color.White;
             ClientSize = new Size(1511, 879);
-            Controls.Add(ResponseLabel);
+            Controls.Add(CallDataTabControl);
+            Controls.Add(HttpVerbSelection);
             Controls.Add(StatusStrip);
-            Controls.Add(ResponseTextBox);
             Controls.Add(CallAPIButton);
             Controls.Add(APITextBox);
             Controls.Add(EnterAPILabel);
@@ -140,6 +193,11 @@
             Text = " Postman Clone by Ziad Hany";
             StatusStrip.ResumeLayout(false);
             StatusStrip.PerformLayout();
+            CallDataTabControl.ResumeLayout(false);
+            BodyTab.ResumeLayout(false);
+            BodyTab.PerformLayout();
+            ResponseTab.ResumeLayout(false);
+            ResponseTab.PerformLayout();
             ResumeLayout(false);
             PerformLayout();
         }
@@ -150,9 +208,13 @@
         private Label EnterAPILabel;
         private TextBox APITextBox;
         private Button CallAPIButton;
-        private TextBox ResponseTextBox;
         private StatusStrip StatusStrip;
-        private Label ResponseLabel;
         private ToolStripStatusLabel SystemStatus;
+        private ComboBox HttpVerbSelection;
+        private TabControl CallDataTabControl;
+        private TabPage BodyTab;
+        private TabPage ResponseTab;
+        private TextBox ResponseTextBox;
+        private TextBox BodyTextBox;
     }
 }

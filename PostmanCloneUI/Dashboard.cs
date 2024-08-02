@@ -9,6 +9,7 @@ public partial class Dashboard : Form
     public Dashboard()
     {
         InitializeComponent();
+        HttpVerbSelection.SelectedItem = "GET";
     }
 
     private async void CallAPIButton_Click(object sender, EventArgs e)
@@ -31,6 +32,8 @@ public partial class Dashboard : Form
             // Sample code - replace with the actual API call 
 
             ResponseTextBox.Text = await _api.CallApiAsync(APITextBox.Text);
+
+            CallDataTabControl.SelectedTab = ResponseTab;
             SystemStatus.Text = "Ready";
         }
         catch (Exception ex)
@@ -39,4 +42,5 @@ public partial class Dashboard : Form
             SystemStatus.Text = "Error";
         }
     }
+
 }
