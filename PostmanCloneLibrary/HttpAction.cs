@@ -3,5 +3,8 @@
 public enum HttpAction
 {
     GET,
-    POST
+    POST,
+    PUT,
+    PATCH,
+    DELETE
 }

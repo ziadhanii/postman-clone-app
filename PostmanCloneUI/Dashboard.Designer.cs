@@ -107,7 +107,7 @@
             // 
             HttpVerbSelection.DropDownStyle = ComboBoxStyle.DropDownList;
             HttpVerbSelection.FormattingEnabled = true;
-            HttpVerbSelection.Items.AddRange(new object[] { "GET", "POST" });
+            HttpVerbSelection.Items.AddRange(new object[] { "GET", "POST", "PUT", "PATCH", "DELETE" });
             HttpVerbSelection.Location = new Point(54, 165);
             HttpVerbSelection.Name = "HttpVerbSelection";
             HttpVerbSelection.Size = new Size(127, 49);
