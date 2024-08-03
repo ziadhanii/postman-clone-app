@@ -25,15 +25,20 @@ public partial class Dashboard : Form
             return;
         }
 
-
+        HttpAction action;
+        if (Enum.TryParse(HttpVerbSelection.SelectedItem!.ToString(), out action) == false)
+        {
+            SystemStatus.Text = "Invalid HTTP Verb";
+            return;
+        }
+        
         try
         {
-            SystemStatus.Text = "Calling API...";
             // Sample code - replace with the actual API call 
-
-            ResponseTextBox.Text = await _api.CallApiAsync(APITextBox.Text);
-
+            ResponseTextBox.Text = await _api.CallApiAsync(APITextBox.Text, BodyTextBox.Text, action, true);
             CallDataTabControl.SelectedTab = ResponseTab;
+            ResponseTab.Focus();
+
             SystemStatus.Text = "Ready";
         }
         catch (Exception ex)
@@ -42,5 +47,4 @@ public partial class Dashboard : Form
             SystemStatus.Text = "Error";
         }
     }
-
 }
