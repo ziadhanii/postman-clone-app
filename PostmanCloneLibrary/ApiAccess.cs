@@ -1,79 +1,100 @@
-﻿using System.Text;
+﻿using System.Net;
 using System.Text.Json;
+using System.Text;
 
-namespace PostmanCloneLibrary;
-
-public class ApiAccess : IApiAccess
+namespace PostmanCloneLibrary
 {
-    private readonly HttpClient _client = new();
-
-
-    public async Task<string> CallApiAsync(
-        string url, string content,
-        HttpAction action = HttpAction.GET, bool formatOutput = true)
+    public class ApiAccess : IApiAccess
     {
-        StringContent stringContent = new(content, Encoding.UTF8, "application/json");
-        return await CallApiAsync(url, stringContent, action, formatOutput);
-    }
+        private readonly HttpClient _httpClient;
 
-    public async Task<string> CallApiAsync(
-        string url, HttpContent? content = null,
-        HttpAction action = HttpAction.GET, bool formatOutput = true
-    )
-    {
-        HttpResponseMessage? response;
-
-        switch (action)
+        public ApiAccess(HttpClient httpClient)
         {
-            case HttpAction.GET:
-                response = await _client.GetAsync(url);
-                break;
-            case HttpAction.POST:
-                response = await _client.PostAsync(url, content);
-                break;
-            case HttpAction.PUT:
-                response = await _client.PutAsync(url, content);
-                break;
-            case HttpAction.PATCH:
-                response = await _client.PatchAsync(url, content);
-                break;
-            case HttpAction.DELETE:
-                response = await _client.DeleteAsync(url);
-                break;
-            default:
-                throw new ArgumentOutOfRangeException(nameof(action), action, null);
+            _httpClient = httpClient ?? throw new ArgumentNullException(nameof(httpClient));
         }
 
-        if (response.IsSuccessStatusCode)
+        public async Task<(string Content, HttpStatusCode StatusCode)> CallApiAsync(
+            string url, string? content = null,
+            HttpAction action = HttpAction.GET, bool formatOutput = true)
         {
-            string json = await response.Content.ReadAsStringAsync();
-            if (formatOutput)
-            {
-                var jsonElement = JsonSerializer.Deserialize<JsonElement>(json);
+            var httpContent =
+                content is not null ? new StringContent(content, Encoding.UTF8, "application/json") : null;
 
-                json = JsonSerializer.Serialize(jsonElement,
-                    new JsonSerializerOptions { WriteIndented = true });
+            return await CallApiAsync(url, httpContent, action, formatOutput);
+        }
+
+        public async Task<(string Content, HttpStatusCode StatusCode)> CallApiAsync(
+            string url, HttpContent? content = null,
+            HttpAction action = HttpAction.GET, bool formatOutput = true)
+        {
+            HttpResponseMessage response;
+            try
+            {
+                response = action switch
+                {
+                    HttpAction.GET => await _httpClient.GetAsync(url),
+                    HttpAction.POST => await _httpClient.PostAsync(url, content),
+                    HttpAction.PUT => await _httpClient.PutAsync(url, content),
+                    HttpAction.PATCH => await _httpClient.PatchAsync(url, content),
+                    HttpAction.DELETE => await _httpClient.DeleteAsync(url),
+                    _ => throw new ArgumentOutOfRangeException(nameof(action), action, "Invalid HTTP action")
+                };
+            }
+            catch (HttpRequestException ex)
+            {
+                return ($"Request failed: {ex.Message}", HttpStatusCode.BadRequest);
             }
 
-            return json;
+            return await ProcessResponseAsync(response, formatOutput);
         }
-        else
+
+        private async Task<(string Content, HttpStatusCode StatusCode)> ProcessResponseAsync(
+            HttpResponseMessage response, bool formatOutput)
         {
-            return $"Error: {response.StatusCode}";
+            var statusCode = response.StatusCode;
+            var responseContent = string.Empty;
+
+            if (response.IsSuccessStatusCode)
+            {
+                responseContent = await response.Content.ReadAsStringAsync();
+
+                if (formatOutput && !string.IsNullOrWhiteSpace(responseContent))
+                {
+                    responseContent = FormatJson(responseContent);
+                }
+            }
+            else
+            {
+                responseContent = $"Error: {statusCode}";
+            }
+
+            return (responseContent, statusCode);
         }
-    }
 
-
-    public bool IsValidUrl(string url)
-    {
-        if (string.IsNullOrWhiteSpace(url))
+        private string FormatJson(string jsonContent)
         {
-            return false;
+            try
+            {
+                var jsonElement = JsonSerializer.Deserialize<JsonElement>(jsonContent);
+                return JsonSerializer.Serialize(jsonElement, new JsonSerializerOptions { WriteIndented = true });
+            }
+            catch (JsonException)
+            {
+                return jsonContent;
+            }
         }
 
 
-        bool output = Uri.TryCreate(url, UriKind.Absolute, out Uri? uriOutput) &&
-                      (uriOutput.Scheme == Uri.UriSchemeHttps);
-        return output;
+        public bool IsValidUrl(string url)
+        {
+            if (string.IsNullOrWhiteSpace(url))
+            {
+                return false;
+            }
+
+            bool output = Uri.TryCreate(url, UriKind.Absolute, out Uri? uriOutput) &&
+                          (uriOutput.Scheme == Uri.UriSchemeHttps);
+            return output;
+        }
     }
 }

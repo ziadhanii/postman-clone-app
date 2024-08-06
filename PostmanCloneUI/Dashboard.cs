@@ -1,27 +1,29 @@
+using System.Net;
 using PostmanCloneLibrary;
 
 namespace PostmanCloneUI;
 
 public partial class Dashboard : Form
 {
-    private readonly IApiAccess _api = new ApiAccess();
+    private readonly IApiAccess _api = new ApiAccess(new HttpClient());
 
     public Dashboard()
     {
         InitializeComponent();
         HttpVerbSelection.SelectedItem = "GET";
+        DisplayStatusCodeLabel.Text = "";
     }
 
     private async void CallAPIButton_Click(object sender, EventArgs e)
     {
         SystemStatus.Text = "Calling API...";
         ResponseTextBox.Text = "";
-        // Validate the API URL  
 
 
         if (_api.IsValidUrl(APITextBox.Text) == false)
         {
             SystemStatus.Text = "Invalid URL";
+            SystemStatus.ForeColor = Color.Red;
             return;
         }
 
@@ -29,13 +31,32 @@ public partial class Dashboard : Form
         if (Enum.TryParse(HttpVerbSelection.SelectedItem!.ToString(), out action) == false)
         {
             SystemStatus.Text = "Invalid HTTP Verb";
+            SystemStatus.ForeColor = Color.Red;
             return;
         }
-        
+
         try
         {
-            // Sample code - replace with the actual API call 
-            ResponseTextBox.Text = await _api.CallApiAsync(APITextBox.Text, BodyTextBox.Text, action, true);
+            var (content, statusCode) =
+                await _api.CallApiAsync(APITextBox.Text, BodyTextBox.Text, action, OutputFormat.Checked);
+            // Switch Expression 
+
+            DisplayStatusCodeLabel.ForeColor = statusCode switch
+            {
+                >= HttpStatusCode.OK and < HttpStatusCode.Ambiguous => Color.Green,
+                >= HttpStatusCode.Ambiguous and < HttpStatusCode.BadRequest => Color.Yellow,
+                >= HttpStatusCode.BadRequest and < HttpStatusCode.InternalServerError => Color.Red,
+                >= HttpStatusCode.InternalServerError => Color.Orange,
+                _ => Color.Blue
+            };
+
+            DisplayStatusCodeLabel.Text = $@"{(int)statusCode} {statusCode}";
+            ResponseTextBox.Text = content;
+            if (content == String.Empty)
+            {
+                ResponseTextBox.Text = statusCode.ToString();
+            }
+
             CallDataTabControl.SelectedTab = ResponseTab;
             ResponseTab.Focus();
 
@@ -43,8 +64,9 @@ public partial class Dashboard : Form
         }
         catch (Exception ex)
         {
-            ResponseTextBox.Text = "Error: " + ex.Message;
+            ResponseTextBox.Text = "Error : " + ex.Message;
             SystemStatus.Text = "Error";
+            SystemStatus.ForeColor = Color.Red;
         }
     }
 }
